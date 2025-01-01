@@ -54,24 +54,23 @@ export class AuthManager {
       throw new Error("Invalid token. Login failed.");
     }
 
-    // Check if already logged in
-    if (
-      localStorage.getItem("isLoggedIn") === "true" &&
-      localStorage.getItem("userName") === name
-    ) {
-      throw new Error("This user is already logged in.");
-    }
-
-    const token = this.createToken({
+    const tokenPayload = {
       name,
       role: userRole,
       exp: this.getExpirationTime(),
-    });
+    };
+
+    // Check the token payload
+    console.log("Token Payload before encoding:", tokenPayload);
+
+    const token = this.createToken(tokenPayload); // Create custom token
 
     localStorage.setItem("userName", name);
     localStorage.setItem("userRole", userRole);
     localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("authToken", token);
+    localStorage.setItem("authToken", token); // Store the custom token in localStorage
+
+    console.log("Google login success. Token set:", token);
   }
 
   // Generate a token with an expiration time
@@ -135,13 +134,28 @@ export class AuthManager {
   }
 
   // Decode the token
+  // static decodeToken(): object | null {
+  //   const token = localStorage.getItem("authToken");
+  //   if (!token) return null;
+
+  //   try {
+  //     const [, payload] = token.split(".");
+  //     return JSON.parse(this.base64UrlDecode(payload));
+  //   } catch (error) {
+  //     console.error("Error decoding token:", error);
+  //     return null;
+  //   }
+  // }
+
   static decodeToken(): object | null {
     const token = localStorage.getItem("authToken");
     if (!token) return null;
 
     try {
       const [, payload] = token.split(".");
-      return JSON.parse(this.base64UrlDecode(payload));
+      const decodedPayload = JSON.parse(this.base64UrlDecode(payload));
+      console.log("Decoded Token Payload:", decodedPayload);
+      return decodedPayload;
     } catch (error) {
       console.error("Error decoding token:", error);
       return null;
