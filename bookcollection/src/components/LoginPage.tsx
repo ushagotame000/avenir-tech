@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import GoogleLoginButton from "./GoogleLoginButton";
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -55,6 +56,10 @@ const LoginPage: React.FC = () => {
           Click me for Register
         </Link>
       </p>
+      <div className="google-login">
+        <h3>Or</h3>
+        <GoogleLoginButton />
+      </div>
     </div>
   );
 };

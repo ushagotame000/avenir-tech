@@ -1,25 +1,31 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthManager } from "../services/AuthManager";
 
-//d authcontex
+// Define AuthContext interface
 interface AuthContextProps {
   isLoggedIn: boolean;
   userRole: string | null;
   userName: string | null;
   login: (name: string, password: string) => void;
+  loginWithGoogle: (
+    tokenId: string,
+    userName: string,
+    userRole: string
+  ) => void;
   logout: () => void;
 }
 
-// D type
+// Define AuthProvider props
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-// context valus
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(AuthManager.isLoggedIn());
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(
+    AuthManager.isLoggedIn()
+  );
   const [userRole, setUserRole] = useState<string | null>(
     AuthManager.getUserRole()
   );
@@ -27,30 +33,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     AuthManager.getUserName()
   );
 
+  // Sync state with AuthManager changes
   useEffect(() => {
     setIsLoggedIn(AuthManager.isLoggedIn());
     setUserRole(AuthManager.getUserRole());
     setUserName(AuthManager.getUserName());
-  }, [isLoggedIn]);
+  }, []);
 
+  // Login using username and password
   const login = (name: string, password: string) => {
-    AuthManager.login(name, password);
-    setIsLoggedIn(true);
-    setUserRole(AuthManager.getUserRole());
-    setUserName(AuthManager.getUserName());
+    try {
+      AuthManager.login(name, password);
+      setIsLoggedIn(true);
+      setUserRole(AuthManager.getUserRole());
+      setUserName(AuthManager.getUserName());
+    } catch (error) {
+      console.error("Login failed:", error);
+      throw error; // Optionally propagate the error
+    }
   };
 
+  // Login with Google
+  const loginWithGoogle = (
+    tokenId: string,
+    googleUserName: string,
+    googleUserRole: string
+  ) => {
+    try {
+      AuthManager.loginWithGoogle(tokenId, googleUserName, googleUserRole);
+      setIsLoggedIn(true);
+      setUserRole(AuthManager.getUserRole());
+      setUserName(AuthManager.getUserName());
+    } catch (error) {
+      console.error("Google login failed:", error);
+    }
+  };
+
+  // Logout
   const logout = () => {
     AuthManager.logout();
     setIsLoggedIn(false);
     setUserRole(null);
     setUserName(null);
   };
-  const contextValue = {
+
+  // Context value
+  const contextValue: AuthContextProps = {
     isLoggedIn,
     userRole,
     userName,
     login,
+    loginWithGoogle,
     logout,
   };
 

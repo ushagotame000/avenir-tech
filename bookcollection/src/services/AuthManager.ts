@@ -33,6 +33,27 @@ export class AuthManager {
       throw new Error("Invalid username or password.");
     }
 
+    const token = this.createToken({
+      name,
+      role: user.role,
+      exp: this.getExpirationTime(),
+    });
+
+    localStorage.setItem("userName", name);
+    localStorage.setItem("userRole", user.role);
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("authToken", token);
+  }
+
+  static loginWithGoogle(
+    tokenId: string,
+    name: string,
+    userRole: string
+  ): void {
+    if (!tokenId) {
+      throw new Error("Invalid token. Login failed.");
+    }
+
     // Check if already logged in
     if (
       localStorage.getItem("isLoggedIn") === "true" &&
@@ -43,12 +64,12 @@ export class AuthManager {
 
     const token = this.createToken({
       name,
-      role: user.role,
+      role: userRole,
       exp: this.getExpirationTime(),
     });
 
     localStorage.setItem("userName", name);
-    localStorage.setItem("userRole", user.role);
+    localStorage.setItem("userRole", userRole);
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("authToken", token);
   }
@@ -62,7 +83,7 @@ export class AuthManager {
   }
 
   private static getExpirationTime(): number {
-    return Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
+    return Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
   }
 
   static logout() {
