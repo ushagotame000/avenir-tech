@@ -5,13 +5,13 @@ import GoogleLoginButton from "./GoogleLoginButton";
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
-  const [name, setName] = useState("");
+  const [email, setemail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   // const handleLogin = () => {
   //   try {
-  //     AuthManager.login(name, password);
+  //     AuthManager.login(email, password);
   //     navigate("/display");
   //   } catch (error) {
   //     const errorMessage =
@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
   // };
   //after using authcontex
   const handleLogin = () => {
-    login(name, password);
+    login(email, password);
     navigate("/display");
   };
 
@@ -31,9 +31,9 @@ const LoginPage: React.FC = () => {
       <h2 className="text-2xl font-bold text-center mb-4">Login</h2>
       <input
         type="text"
-        placeholder="Enter your name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e) => setemail(e.target.value)}
         className="w-full mb-4 p-2 border rounded"
       />
       <input

@@ -17,27 +17,22 @@ const GoogleLoginButton: React.FC = () => {
   const onSuccess = (credentialResponse: CredentialResponse) => {
     if (credentialResponse.credential) {
       const tokenId = credentialResponse.credential;
-      localStorage.setItem("authToken", tokenId); // Store token in localStorage
 
-      const decodedToken = AuthManager.decodeToken(); // Decode token from localStorage
+      localStorage.setItem("authToken", tokenId);
+      const decodedToken = AuthManager.decodeToken();
+
       if (decodedToken) {
         console.log("Decoded Token in onSuccess:", decodedToken);
 
-        const { name, userRole } = decodedToken as {
+        const { email, name } = decodedToken as {
+          email: string;
           name: string;
-          userRole: string;
         };
+        //degaul role
+        const userRole = "Admin";
+        console.log("Name:", name, "Email:", email, "Role:", userRole);
 
-        if (!userRole) {
-          console.error("User role is undefined in the token payload.");
-          alert("Login failed: Role information missing.");
-          return;
-        }
-
-        console.log("Name:", name, "Role:", userRole);
-
-        AuthManager.loginWithGoogle(tokenId, name, userRole);
-
+        AuthManager.loginWithGoogle(tokenId, email, userRole);
         navigate("/display");
       } else {
         console.error("Failed to decode Google login token.");

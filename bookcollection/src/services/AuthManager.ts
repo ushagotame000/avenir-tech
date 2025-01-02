@@ -1,45 +1,45 @@
 interface TokenPayload {
-  name: string;
+  email: string;
   role: string;
   exp: number;
 }
 
 export class AuthManager {
-  static register(name: string, role: string, password: string) {
+  static register(email: string, role: string, password: string) {
     const users = JSON.parse(localStorage.getItem("users") || "[]");
     const userExists = users.some(
-      (user: { name: string }) => user.name === name
+      (user: { email: string }) => user.email === email
     );
 
     if (userExists) {
-      throw new Error("User already exists. Please use a different name.");
+      alert("User already exists. Please use a different email.");
     }
 
-    const newUser = { name, role, password };
+    const newUser = { email, role, password };
     users.push(newUser);
     localStorage.setItem("users", JSON.stringify(users));
   }
 
   // Login user
-  static login(name: string, password: string) {
+  static login(email: string, password: string) {
     const users = JSON.parse(localStorage.getItem("users") || "[]");
 
     const user = users.find(
-      (u: { name: string; password: string }) =>
-        u.name === name && u.password === password
+      (u: { email: string; password: string }) =>
+        u.email === email && u.password === password
     );
 
     if (!user) {
-      throw new Error("Invalid username or password.");
+      alert("Invalid useremail or password.");
     }
 
     const token = this.createToken({
-      name,
+      email,
       role: user.role,
       exp: this.getExpirationTime(),
     });
 
-    localStorage.setItem("userName", name);
+    localStorage.setItem("useremail", email);
     localStorage.setItem("userRole", user.role);
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("authToken", token);
@@ -47,33 +47,41 @@ export class AuthManager {
 
   static loginWithGoogle(
     tokenId: string,
-    name: string,
-    userRole: string
-  ): void {
+    email: string,
+    userRole: string = "Admin"
+  ) {
     if (!tokenId) {
       throw new Error("Invalid token. Login failed.");
     }
 
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    let user = users.find((u: { email: string }) => u.email === email);
+
+    if (!user) {
+      console.log("User not registered. Registering a new user.");
+      user = { email, role: userRole };
+      users.push(user);
+      localStorage.setItem("users", JSON.stringify(users));
+    }
+
+    // Create token
     const tokenPayload = {
-      name,
-      role: userRole,
-      exp: this.getExpirationTime(),
+      email: user.email,
+      role: user.role,
     };
 
-    // Check the token payload
-    console.log("Token Payload before encoding:", tokenPayload);
+    const token = this.createToken(tokenPayload);
 
-    const token = this.createToken(tokenPayload); // Create custom token
-
-    localStorage.setItem("userName", name);
-    localStorage.setItem("userRole", userRole);
+    localStorage.setItem("useremail", user.email);
+    localStorage.setItem("userRole", user.role);
     localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("authToken", token); // Store the custom token in localStorage
+    localStorage.setItem("authToken", token);
 
-    console.log("Google login success. Token set:", token);
+    console.log("Google login success. Token created and saved:", token);
+    console.log("user after google login :", user);
+    console.log("role after google login :", localStorage.getItem("userRole"));
   }
 
-  // Generate a token with an expiration time
   static createToken(payload: object): string {
     const header = { alg: "HS256", typ: "JWT" };
     const encodedHeader = this.base64UrlEncode(JSON.stringify(header));
@@ -82,11 +90,11 @@ export class AuthManager {
   }
 
   private static getExpirationTime(): number {
-    return Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
+    return Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
   }
 
   static logout() {
-    localStorage.removeItem("userName");
+    localStorage.removeItem("useremail");
     localStorage.removeItem("userRole");
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("authToken");
@@ -112,23 +120,23 @@ export class AuthManager {
       return false;
     }
 
-    const userName = localStorage.getItem("userName");
+    const useremail = localStorage.getItem("useremail");
     const userRole = localStorage.getItem("userRole");
-    return payload.name === userName && payload.role === userRole;
+    return payload.email === useremail && payload.role === userRole;
   }
 
-  // Check if the token has expired
+  // Check if the token  expired
   private static isTokenExpired(exp: number): boolean {
     const currentTime = Math.floor(Date.now() / 1000);
     return exp < currentTime;
   }
 
-  // Get the username of the logged-in user
-  static getUserName(): string | null {
-    return localStorage.getItem("userName");
+  // Get the useremail oflogged-in user
+  static getUseremail(): string | null {
+    return localStorage.getItem("useremail");
   }
 
-  // Get the role of the logged-in user
+  // Get the role of logged-in user
   static getUserRole(): string | null {
     return localStorage.getItem("userRole");
   }

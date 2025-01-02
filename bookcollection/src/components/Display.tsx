@@ -11,8 +11,8 @@ export const Display: React.FC = () => {
   const [currentBook, setCurrentBook] = useState<Book | null>(null);
   const navigate = useNavigate();
 
-  // Use  useAuth  to get user role and username
-  const { userRole, userName, logout } = useAuth();
+  // FROM AUTH get user role N useremail
+  const { userRole, useremail, logout } = useAuth();
 
   // Load books from l/c storage
   useEffect(() => {
@@ -74,7 +74,7 @@ export const Display: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-4 bg-gray-50 flex flex-col items-center">
       <h1 className="text-3xl font-bold text-blue-600 mb-6">Book Inventory</h1>
-      <p className="text-center mb-4">Welcome, {userName}!</p>
+      <p className="text-center mb-4">Welcome, {useremail}!</p>
 
       {(userRole === "Admin" || userRole === "Librarian") && (
         <>
